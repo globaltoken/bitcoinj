@@ -19,8 +19,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.bitcoinj</groupId>
-  <artifactId>bitcoinj-parent</artifactId>
+  <groupId>org.globaltokenj</groupId>
+  <artifactId>globaltokenj-parent</artifactId>
   <version>0.15-SNAPSHOT</version>
   <packaging>pom</packaging>
 
@@ -38,13 +38,13 @@
   </parent>
 
   <scm>
-    <connection>scm:git:https://github.com/bitcoinj/bitcoinj</connection>
-    <developerConnection>scm:git:https://github.com/bitcoinj/bitcoinj</developerConnection>
-    <url>scm:git:https://github.com/bitcoinj/bitcoinj</url>
+    <connection>scm:git:https://github.com/globaltoken/globaltokenj</connection>
+    <developerConnection>scm:git:https://github.com/globaltoken/globaltokenj</developerConnection>
+    <url>scm:git:https://github.com/globaltoken/globaltokenj</url>
   </scm>
 
-  <name>bitcoinj Parent</name>
-  <description>Provides the common configuration for the BitCoinJ modules</description>
+  <name>globaltokenj Parent</name>
+  <description>Provides the common configuration for the GlobalTokenJ modules</description>
   <url>http://www.bitcoinj.org/</url>
 
   <licenses>
@@ -58,7 +58,7 @@
 
   <issueManagement>
     <system>GitHub</system>
-    <url>https://github.com/bitcoinj/bitcoinj/issues</url>
+    <url>https://github.com/globaltoken/globaltokenj/issues</url>
   </issueManagement>
 
   <mailingLists>

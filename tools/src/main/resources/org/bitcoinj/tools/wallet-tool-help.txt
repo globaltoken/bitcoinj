@@ -44,7 +44,7 @@ Usage: wallet-tool --flags action-name
                        payment request. A payment request can be a local file, a bitcoin uri, or url to
                        download the payment request, e.g.:
                          --payment-request=/path/to/my.bitcoinpaymentrequest
-                         --payment-request=bitcoin:?r=http://merchant.com/pay.php?123
+                         --payment-request=globaltoken:?r=http://merchant.com/pay.php?123
                          --payment-request=http://merchant.com/pay.php?123
 
                        Other options include:

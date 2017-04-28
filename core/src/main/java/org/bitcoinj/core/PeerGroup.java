@@ -163,7 +163,7 @@ public class PeerGroup implements TransactionBroadcaster {
     // peer can fetch them.
     private final PeerListener peerListener = new PeerListener();
 
-    private int minBroadcastConnections = 0;
+    private int minBroadcastConnections = 2;
     private final ScriptsChangeEventListener walletScriptEventListener = new ScriptsChangeEventListener() {
         @Override public void onScriptsChanged(Wallet wallet, List<Script> scripts, boolean isAddingScripts) {
             recalculateFastCatchupAndFilter(FilterRecalculateMode.SEND_IF_CHANGED);
