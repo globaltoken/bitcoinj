@@ -74,9 +74,9 @@ public class MainNetParams extends AbstractBitcoinNetParams {
         dnsSeeds = new String[] {
                 "134.255.221.7",         // Globaltoken Base Node
 				"75.109.15.26",          // Globaltoken Node 1
-				"31.214.240.69",         // Globaltoken Node 2
-				"185.188.6.41",          // Globaltoken Node 3
-				"78.46.198.89"           // Globaltoken Node 4
+				"185.188.6.41",          // Globaltoken Node 2
+				"78.46.198.89",          // Globaltoken Node 3
+				"5.9.39.9"               // Globaltoken Node 4
         };
         httpSeeds = null;
 
