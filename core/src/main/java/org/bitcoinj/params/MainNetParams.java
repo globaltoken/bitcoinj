@@ -64,19 +64,29 @@ public class MainNetParams extends AbstractBitcoinNetParams {
         // transactions are handled. Duplicated transactions could occur in the case where a coinbase had the same
         // extraNonce and the same outputs but appeared at different heights, and greatly complicated re-org handling.
         // Having these here simplifies block connection logic considerably.
-        checkpoints.put(50000, Sha256Hash.wrap("0000000000024f4cefcf1bcbe62287f8292e6ff2eb10b1761de4134b93e429d5"));
-        checkpoints.put(50010, Sha256Hash.wrap("0000000000063d8718265e703fe003d2219adc369ce39eb6a1c7ddcbea6a95ee"));
-        checkpoints.put(50020, Sha256Hash.wrap("00000000000296ad876b5fe0bbfe9b00f9d1691a896c20262666d1175eb0c492"));
-        checkpoints.put(50050, Sha256Hash.wrap("000000000005fa1d787edb692b6cd844305fee830a98f92fddf4edef983a410d"));
-        checkpoints.put(50100, Sha256Hash.wrap("000000000004af13462e8153ee9adfacde7fb2ecd28b0fb48bcec1e4240a792e"));
+        checkpoints.put(500, Sha256Hash.wrap("00000000000018079c07b36a74919748129bbd3840de0a4bee720fa92fe2ad7a"));
+		checkpoints.put(30000, Sha256Hash.wrap("00000000000086d8aa795fcd1d5f0db232c4a9d2c33ca8b976d06fd9c205c980"));
 		checkpoints.put(80000, Sha256Hash.wrap("000000000000c1f8a5bddc42d82b6bdd322afdba3afa95670c7e4aa5073594e6"));
-
+		checkpoints.put(125000, Sha256Hash.wrap("0000000000000d76f0e23774c3e181da3db141857df3c6bba8bd7b8c94e87cd0"));
+		checkpoints.put(155555, Sha256Hash.wrap("000000000000855b551daf4e7758e53fd767781b652c71bb3bba1d340994cb8e"));
+		checkpoints.put(190000, Sha256Hash.wrap("00000000000004518733e0c572ee08227577260345c1484921752c948009d238"));
+		checkpoints.put(210000, Sha256Hash.wrap("00000000000001b9719d694b2c6b2a74173d9333ba7e629439d8de8bd42e993f"));
+		
+		
         dnsSeeds = new String[] {
                 "134.255.221.7",         // Globaltoken Base Node
-				"75.109.15.26",          // Globaltoken Node 1
-				"185.188.6.41",          // Globaltoken Node 2
+				"45.21.57.92",           // Globaltoken Node 1
+				"185.188.6.41",         // Globaltoken Node 2
 				"78.46.198.89",          // Globaltoken Node 3
-				"5.9.39.9"               // Globaltoken Node 4
+				"149.56.241.2",          // Globaltoken Node 4
+				"94.130.16.229",              // Globaltoken Node 5
+				"109.134.66.160",              // Globaltoken Node 6
+				"91.134.166.76",              // Globaltoken Node 7
+				"62.75.171.246",              // Globaltoken Node 8
+				"94.130.14.168",              // Globaltoken Node 9
+				"91.39.127.95",              // Globaltoken Node 10
+				"167.114.121.103",              // Globaltoken Node 11
+				"138.68.108.250"              // Globaltoken Node 12
         };
         httpSeeds = null;
 
