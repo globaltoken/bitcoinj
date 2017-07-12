@@ -21,6 +21,7 @@ import org.bitcoinj.core.TransactionConfidence.ConfidenceType;
 import org.bitcoinj.crypto.TransactionSignature;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptBuilder;
+import org.bitcoinj.script.ScriptError;
 import org.bitcoinj.script.ScriptOpCodes;
 import org.bitcoinj.signers.TransactionSigner;
 import org.bitcoinj.utils.ExchangeRate;
@@ -79,8 +80,12 @@ public class Transaction extends ChildMessage {
     public static final Comparator<Transaction> SORT_TX_BY_HEIGHT = new Comparator<Transaction>() {
         @Override
         public int compare(final Transaction tx1, final Transaction tx2) {
-            final int height1 = tx1.getConfidence().getAppearedAtChainHeight();
-            final int height2 = tx2.getConfidence().getAppearedAtChainHeight();
+            final TransactionConfidence confidence1 = tx1.getConfidence();
+            final int height1 = confidence1.getConfidenceType() == ConfidenceType.BUILDING
+                    ? confidence1.getAppearedAtChainHeight() : Block.BLOCK_HEIGHT_UNKNOWN;
+            final TransactionConfidence confidence2 = tx2.getConfidence();
+            final int height2 = confidence2.getConfidenceType() == ConfidenceType.BUILDING
+                    ? confidence2.getAppearedAtChainHeight() : Block.BLOCK_HEIGHT_UNKNOWN;
             final int heightComparison = -(Ints.compare(height1, height2));
             //If height1==height2, compare by tx hash to make comparator consistent with equals
             return heightComparison != 0 ? heightComparison : tx1.getHash().compareTo(tx2.getHash());
@@ -187,6 +192,20 @@ public class Transaction extends ChildMessage {
      */
     @Nullable
     private String memo;
+
+    /* Below flags apply in the context of BIP 68 */
+    /* If this flag set, CTxIn::nSequence is NOT interpreted as a
+     * relative lock-time. */
+    public static final long SEQUENCE_LOCKTIME_DISABLE_FLAG = 1L << 31;
+
+    /* If CTxIn::nSequence encodes a relative lock-time and this flag
+     * is set, the relative lock-time has units of 512 seconds,
+     * otherwise it specifies blocks with a granularity of 1. */
+    public static final long SEQUENCE_LOCKTIME_TYPE_FLAG = 1L << 22;
+
+    /* If CTxIn::nSequence encodes a relative lock-time, this mask is
+     * applied to extract that lock-time from the sequence field. */
+    public static final long SEQUENCE_LOCKTIME_MASK = 0x0000ffff;
 
     public Transaction(NetworkParameters params) {
         super(params);
@@ -809,7 +828,7 @@ public class Transaction extends ChildMessage {
         else if (scriptPubKey.isSentToAddress())
             input.setScriptSig(ScriptBuilder.createInputScript(txSig, sigKey));
         else
-            throw new ScriptException("Don't know how to sign for this kind of scriptPubKey: " + scriptPubKey);
+            throw new ScriptException(ScriptError.SCRIPT_ERR_UNKNOWN_ERROR, "Don't know how to sign for this kind of scriptPubKey: " + scriptPubKey);
         return input;
     }
 
