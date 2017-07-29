@@ -39,30 +39,26 @@ public class TestNet3Params extends AbstractBitcoinNetParams {
         super();
         id = ID_TESTNET;
         // Genesis hash is 000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943
-        packetMagic = 0x0b110907;
+        packetMagic = 0x3a6f375b;
         interval = INTERVAL;
         targetTimespan = TARGET_TIMESPAN;
         maxTarget = Utils.decodeCompactBits(0x1d00ffffL);
-        port = 18333;
+        port = 19319;
         addressHeader = 111;
         p2shHeader = 196;
         acceptableAddressCodes = new int[] { addressHeader, p2shHeader };
         dumpedPrivateKeyHeader = 239;
-        genesisBlock.setTime(1296688602L);
+        genesisBlock.setTime(1480961109L);
         genesisBlock.setDifficultyTarget(0x1d00ffffL);
-        genesisBlock.setNonce(414098458);
+        genesisBlock.setNonce(2864352084L);
         spendableCoinbaseDepth = 100;
-        subsidyDecreaseBlockCount = 210000;
+        subsidyDecreaseBlockCount = 840000;
         String genesisHash = genesisBlock.getHashAsString();
-        checkState(genesisHash.equals("000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943"));
-        alertSigningKey = Utils.HEX.decode("04302390343f91cc401d56d68b123028bf52e5fca1939df127f63c6467cdf9c8e2c14b61104cf817d0b780da337893ecc4aaff1309e536162dabbdb45200ca2b0a");
+        checkState(genesisHash.equals("00000000fe3e3e93344a6b73888137397413eb11f601b4231b5196390d24d3b6"));
+        alertSigningKey = Utils.HEX.decode("042cddcb679f0089cac93820d4e7e309a43e0bb7d02e9750c9e8dacaca58bd98662eba63834eff2efbb62da1aa51af4c7885d68fdb4f020a37909dff4c1467d28f");
 
         dnsSeeds = new String[] {
-                "testnet-seed.bitcoin.jonasschnelli.ch", // Jonas Schnelli
-                "testnet-seed.bluematt.me",              // Matt Corallo
-                "testnet-seed.bitcoin.petertodd.org",    // Peter Todd
-                "testnet-seed.bitcoin.schildbach.de",    // Andreas Schildbach
-                "bitcoin-testnet.bloqseeds.net",         // Bloq
+                "134.255.221.7" // No active Testnet Peers yet, use localhost.
         };
         addrSeeds = null;
         bip32HeaderPub = 0x043587CF;

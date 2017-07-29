@@ -216,7 +216,7 @@ public class Block extends Message {
      * </p>
      */
     public Coin getBlockInflation(int height) {
-        return FIFTY_COINS.shiftRight(height / params.getSubsidyDecreaseBlockCount());
+        return HUNDRED_COINS.shiftRight(height / params.getSubsidyDecreaseBlockCount());
     }
 
     /**
@@ -901,7 +901,7 @@ public class Block extends Message {
      */
     @VisibleForTesting
     public Block createNextBlock(Address to, long version, long time, int blockHeight) {
-        return createNextBlock(to, version, null, time, pubkeyForTesting, FIFTY_COINS, blockHeight);
+        return createNextBlock(to, version, null, time, pubkeyForTesting, HUNDRED_COINS, blockHeight);
     }
 
     /**
@@ -921,7 +921,7 @@ public class Block extends Message {
         if (to != null) {
             // Add a transaction paying 50 coins to the "to" address.
             Transaction t = new Transaction(params);
-            t.addOutput(new TransactionOutput(params, t, FIFTY_COINS, to));
+            t.addOutput(new TransactionOutput(params, t, HUNDRED_COINS, to));
             // The input does not really need to be a valid signature, as long as it has the right general form.
             TransactionInput input;
             if (prevOut == null) {
@@ -959,7 +959,7 @@ public class Block extends Message {
 
     @VisibleForTesting
     public Block createNextBlock(@Nullable Address to, TransactionOutPoint prevOut) {
-        return createNextBlock(to, BLOCK_VERSION_GENESIS, prevOut, getTimeSeconds() + 5, pubkeyForTesting, FIFTY_COINS, BLOCK_HEIGHT_UNKNOWN);
+        return createNextBlock(to, BLOCK_VERSION_GENESIS, prevOut, getTimeSeconds() + 5, pubkeyForTesting, HUNDRED_COINS, BLOCK_HEIGHT_UNKNOWN);
     }
 
     @VisibleForTesting
@@ -969,7 +969,7 @@ public class Block extends Message {
 
     @VisibleForTesting
     public Block createNextBlock(@Nullable Address to) {
-        return createNextBlock(to, FIFTY_COINS);
+        return createNextBlock(to, HUNDRED_COINS);
     }
 
     @VisibleForTesting
@@ -985,7 +985,7 @@ public class Block extends Message {
     @VisibleForTesting
     Block createNextBlockWithCoinbase(long version, byte[] pubKey, final int height) {
         return createNextBlock(null, version, (TransactionOutPoint) null,
-                               Utils.currentTimeSeconds(), pubKey, FIFTY_COINS, height);
+                               Utils.currentTimeSeconds(), pubKey, HUNDRED_COINS, height);
     }
 
     @VisibleForTesting
