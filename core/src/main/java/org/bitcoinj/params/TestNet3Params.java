@@ -58,7 +58,7 @@ public class TestNet3Params extends AbstractBitcoinNetParams {
         alertSigningKey = Utils.HEX.decode("042cddcb679f0089cac93820d4e7e309a43e0bb7d02e9750c9e8dacaca58bd98662eba63834eff2efbb62da1aa51af4c7885d68fdb4f020a37909dff4c1467d28f");
 
         dnsSeeds = new String[] {
-                "127.0.0.1" // No active Testnet Peers yet, use localhost.
+                "134.255.221.7" // No active Testnet Peers yet, use localhost.
         };
         addrSeeds = null;
         bip32HeaderPub = 0x043587CF;

@@ -310,7 +310,7 @@ public class Script {
 
     /**
      * Retrieves the sender public key from a LOCKTIMEVERIFY transaction
-     * @return
+     * @return the sender public key
      * @throws ScriptException
      */
     public byte[] getCLTVPaymentChannelSenderPubKey() throws ScriptException {
@@ -322,7 +322,7 @@ public class Script {
 
     /**
      * Retrieves the recipient public key from a LOCKTIMEVERIFY transaction
-     * @return
+     * @return the recipient public key
      * @throws ScriptException
      */
     public byte[] getCLTVPaymentChannelRecipientPubKey() throws ScriptException {
@@ -717,7 +717,7 @@ public class Script {
             }
             // First chunk must be an OP_N opcode too.
             if (decodeFromOpN(chunks.get(0).opcode) < 1) return false;
-        } catch (IllegalStateException e) {
+        } catch (IllegalArgumentException e) { // thrown by decodeFromOpN()
             return false;   // Not an OP_N opcode.
         }
         return true;
@@ -1541,7 +1541,10 @@ public class Script {
 
             // This RuntimeException occurs when signing as we run partial/invalid scripts to see if they need more
             // signing work to be done inside LocalTransactionSigner.signInputs.
-            if (!e1.getMessage().contains("Reached past end of ASN.1 stream"))
+            // FIXME don't rely on exception message
+            if (e1.getMessage() != null && !e1.getMessage().contains("Reached past end of ASN.1 stream"))
+                // Don't put critical code here; the above check is not reliable on HotSpot due to optimization:
+                // http://jawspeak.com/2010/05/26/hotspot-caused-exceptions-to-lose-their-stack-traces-in-production-and-the-fix/
                 log.warn("Signature checking failed!", e1);
         }
 
