@@ -58,6 +58,7 @@ public abstract class Message {
     protected MessageSerializer serializer;
 
     protected int protocolVersion;
+    protected int transactionOptions = TransactionOptions.ALL;
 
     protected NetworkParameters params;
 
@@ -374,5 +375,13 @@ public abstract class Message {
         if (null != params) {
             this.serializer = params.getDefaultSerializer();
         }
+    }
+
+    public void disableWitness() {
+        transactionOptions &= ~TransactionOptions.WITNESS;
+    }
+
+    public void enableWitness() {
+        transactionOptions |= TransactionOptions.WITNESS;
     }
 }
