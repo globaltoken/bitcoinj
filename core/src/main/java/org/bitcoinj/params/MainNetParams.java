@@ -34,7 +34,7 @@ public class MainNetParams extends AbstractBitcoinNetParams {
     public static final int MAINNET_MAJORITY_WINDOW = 1000;
     public static final int MAINNET_MAJORITY_REJECT_BLOCK_OUTDATED = 950;
     public static final int MAINNET_MAJORITY_ENFORCE_BLOCK_UPGRADE = 750;
-    public static final int SEGWIT_ENFORCE_HEIGHT = 481824;
+    public static final int SEGWIT_ENFORCE_HEIGHT = 400000;
 
     public MainNetParams() {
         super();
