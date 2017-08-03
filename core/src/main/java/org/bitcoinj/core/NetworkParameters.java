@@ -527,8 +527,8 @@ public abstract class NetworkParameters {
         MINIMUM(70000),
         PONG(60001),
         BLOOM_FILTER(70000),
-        WITNESS_VERSION(70012),
-        CURRENT(70012);
+        WITNESS_VERSION(70002),
+        CURRENT(70002);
 
         private final int bitcoinProtocol;
 
