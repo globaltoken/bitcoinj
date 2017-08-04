@@ -71,7 +71,9 @@ public class BitcoinSerializer extends MessageSerializer {
         names.put(RejectMessage.class, "reject");
         names.put(GetUTXOsMessage.class, "getutxos");
         names.put(UTXOsMessage.class, "utxos");
-		names.put(SendHeadersMessage.class, "sendheaders");
+	names.put(SendHeadersMessage.class, "sendheaders");
+	names.put(SendHeadersMessage.class, "sendcmpct");
+	names.put(SendHeadersMessage.class, "feefilter");
     }
 
     /**
