@@ -993,7 +993,7 @@ public class WalletTool {
     }
 
     private static void sendPaymentRequest(String location, boolean verifyPki) {
-        if (location.startsWith("http") || location.startsWith("bitcoin")) {
+        if (location.startsWith("http") || location.startsWith("globaltoken")) {
             try {
                 ListenableFuture<PaymentSession> future;
                 if (location.startsWith("http")) {
