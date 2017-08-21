@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Google Inc.
+ * Copyright 2017 Anton Kumaigorodski
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,21 @@
 
 package org.bitcoinj.core;
 
-import org.bitcoinj.script.ScriptError;
-
-@SuppressWarnings("serial")
-public class ScriptException extends VerificationException {
-
-    private final ScriptError err;
-
-    public ScriptException(ScriptError err, String msg) {
-        super(msg);
-        this.err = err;
+/**
+ * <p>
+ * A new message, "sendheaders", which indicates that a node prefers to receive new block announcements via a "headers"
+ * message rather than an "inv".
+ * </p>
+ *
+ * <p>
+ * See <a href="https://github.com/bitcoin/bips/blob/master/bip-0130.mediawiki">BIP 130</a>.
+ * </p>
+ */
+public class SendHeadersMessage extends EmptyMessage {
+    public SendHeadersMessage() {
     }
 
-    public ScriptException(ScriptError err, String msg, Exception e) {
-        super(msg, e);
-        this.err = err;
-    }
-
-    public ScriptError getError() {
-        return err;
+    // this is needed by the BitcoinSerializer
+    public SendHeadersMessage(NetworkParameters params, byte[] payload) {
     }
 }
