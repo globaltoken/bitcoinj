@@ -527,7 +527,7 @@ public abstract class NetworkParameters {
         MINIMUM(70000),
         PONG(60001),
         BLOOM_FILTER(70000),
-        CURRENT(70012);
+        CURRENT(70002); // Leave it 70002 because 70012 doesn't exists in GLT Versions
 
         private final int bitcoinProtocol;
 
