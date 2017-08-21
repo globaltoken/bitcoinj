@@ -731,7 +731,6 @@ public class PeerGroup implements TransactionBroadcaster {
             peer.addDisconnectedEventListener(executor, listener);
     }
 
-    /** See {@link PeerGroup#addDiscoveredEventListener(Executor, PeerDiscoveredEventListener)} */
     public void addDiscoveredEventListener(PeerDiscoveredEventListener listener) {
         addDiscoveredEventListener(Threading.USER_THREAD, listener);
     }

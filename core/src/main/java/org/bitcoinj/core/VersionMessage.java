@@ -43,7 +43,7 @@ public class VersionMessage extends Message {
     /** The version of this library release, as a string. */
     public static final String BITCOINJ_VERSION = "0.15-SNAPSHOT";
     /** The value that is prepended to the subVer field of this application. */
-    public static final String LIBRARY_SUBVER = "/bitcoinj:" + BITCOINJ_VERSION + "/";
+    public static final String LIBRARY_SUBVER = "/globaltokenj:" + BITCOINJ_VERSION + "/";
 
     /** A services flag that denotes whether the peer has a copy of the block chain or not. */
     public static final int NODE_NETWORK = 1 << 0;
