@@ -551,7 +551,7 @@ public abstract class AbstractBlockChain {
                 || block.getVersion() == Block.BLOCK_VERSION_BIP66) {
                 final Integer count = versionTally.getCountAtOrAbove(block.getVersion() + 1);
                 if (count != null
-                    && count >= params.getMajorityRejectBlockOutdated()) {
+                    && count >= params.getMajorityRejectBlockOutdated() && head.getHeight() >= 299999) {
                     throw new VerificationException.BlockVersionOutOfDate(block.getVersion());
                 }
             }
