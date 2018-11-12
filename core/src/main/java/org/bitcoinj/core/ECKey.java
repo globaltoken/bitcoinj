@@ -23,7 +23,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import com.google.common.primitives.Ints;
 import com.google.common.primitives.UnsignedBytes;
 import org.bitcoin.NativeSecp256k1;
 import org.bitcoin.NativeSecp256k1Util;
@@ -32,28 +31,29 @@ import org.bitcoinj.wallet.Protos;
 import org.bitcoinj.wallet.Wallet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spongycastle.asn1.*;
-import org.spongycastle.asn1.x9.X9ECParameters;
-import org.spongycastle.asn1.x9.X9IntegerConverter;
-import org.spongycastle.crypto.AsymmetricCipherKeyPair;
-import org.spongycastle.crypto.digests.SHA256Digest;
-import org.spongycastle.crypto.ec.CustomNamedCurves;
-import org.spongycastle.crypto.generators.ECKeyPairGenerator;
-import org.spongycastle.crypto.params.*;
-import org.spongycastle.crypto.signers.ECDSASigner;
-import org.spongycastle.crypto.signers.HMacDSAKCalculator;
-import org.spongycastle.math.ec.ECAlgorithms;
-import org.spongycastle.math.ec.ECPoint;
-import org.spongycastle.math.ec.FixedPointCombMultiplier;
-import org.spongycastle.math.ec.FixedPointUtil;
-import org.spongycastle.math.ec.custom.sec.SecP256K1Curve;
-import org.spongycastle.util.encoders.Base64;
+import org.bouncycastle.asn1.*;
+import org.bouncycastle.asn1.x9.X9ECParameters;
+import org.bouncycastle.asn1.x9.X9IntegerConverter;
+import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
+import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.crypto.ec.CustomNamedCurves;
+import org.bouncycastle.crypto.generators.ECKeyPairGenerator;
+import org.bouncycastle.crypto.params.*;
+import org.bouncycastle.crypto.signers.ECDSASigner;
+import org.bouncycastle.crypto.signers.HMacDSAKCalculator;
+import org.bouncycastle.math.ec.ECAlgorithms;
+import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.math.ec.FixedPointCombMultiplier;
+import org.bouncycastle.math.ec.FixedPointUtil;
+import org.bouncycastle.math.ec.custom.sec.SecP256K1Curve;
+import org.bouncycastle.util.Properties;
+import org.bouncycastle.util.encoders.Base64;
 
 import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.util.Arrays;
@@ -136,10 +136,8 @@ public class ECKey implements EncryptableItem {
         if (Utils.isAndroidRuntime())
             new LinuxSecureRandom();
 
-        // Tell Bouncy Castle to precompute data that's needed during secp256k1 calculations. Increasing the width
-        // number makes calculations faster, but at a cost of extra memory usage and with decreasing returns. 12 was
-        // picked after consulting with the BC team.
-        FixedPointUtil.precompute(CURVE_PARAMS.getG(), 12);
+        // Tell Bouncy Castle to precompute data that's needed during secp256k1 calculations.
+        FixedPointUtil.precompute(CURVE_PARAMS.getG());
         CURVE = new ECDomainParameters(CURVE_PARAMS.getCurve(), CURVE_PARAMS.getG(), CURVE_PARAMS.getN(),
                 CURVE_PARAMS.getH());
         HALF_CURVE_ORDER = CURVE_PARAMS.getN().shiftRight(1);
@@ -509,14 +507,6 @@ public class ECKey implements EncryptableItem {
     }
 
     /**
-     * Returns the address that corresponds to the public part of this ECKey. Note that an address is derived from
-     * the RIPEMD-160 hash of the public key and is not the public key itself (which is too large to be convenient).
-     */
-    public Address toAddress(NetworkParameters params) {
-        return new Address(params, getPubKeyHash());
-    }
-
-    /**
      * Groups the two components that make up a signature, and provides a way to encode to DER form, which is
      * how ECDSA signatures are represented when embedded in other data structures in the Bitcoin protocol. The raw
      * components can be useful for doing further EC maths on them.
@@ -577,6 +567,9 @@ public class ECKey implements EncryptableItem {
         public static ECDSASignature decodeFromDER(byte[] bytes) throws IllegalArgumentException {
             ASN1InputStream decoder = null;
             try {
+                // BouncyCastle by default is strict about parsing ASN.1 integers. We relax this check, because some
+                // Bitcoin signatures would not parse.
+                Properties.setThreadOverride("org.bouncycastle.asn1.allow_unsafe_integer", true);
                 decoder = new ASN1InputStream(bytes);
                 final ASN1Primitive seqObj = decoder.readObject();
                 if (seqObj == null)
@@ -599,6 +592,7 @@ public class ECKey implements EncryptableItem {
             } finally {
                 if (decoder != null)
                     try { decoder.close(); } catch (IOException x) {}
+                Properties.removeThreadOverride("org.bouncycastle.asn1.allow_unsafe_integer");
             }
         }
 
@@ -628,7 +622,7 @@ public class ECKey implements EncryptableItem {
 
     /**
      * Signs the given hash and returns the R and S components as BigIntegers. In the Bitcoin protocol, they are
-     * usually encoded using ASN.1 format, so you want {@link org.bitcoinj.core.ECKey.ECDSASignature#toASN1()}
+     * usually encoded using ASN.1 format, so you want {@link ECKey.ECDSASignature#toASN1()}
      * instead. However sometimes the independent components can be useful, for instance, if you're going to do
      * further EC maths on them.
      * @throws KeyCrypterException if this ECKey doesn't have a private part.
@@ -647,7 +641,7 @@ public class ECKey implements EncryptableItem {
 
     /**
      * Signs the given hash and returns the R and S components as BigIntegers. In the Bitcoin protocol, they are
-     * usually encoded using DER format, so you want {@link org.bitcoinj.core.ECKey.ECDSASignature#encodeToDER()}
+     * usually encoded using DER format, so you want {@link ECKey.ECDSASignature#encodeToDER()}
      * instead. However sometimes the independent components can be useful, for instance, if you're doing to do further
      * EC maths on them.
      *
@@ -866,26 +860,16 @@ public class ECKey implements EncryptableItem {
      * @throws KeyCrypterException if this ECKey is encrypted and no AESKey is provided or it does not decrypt the ECKey.
      */
     public String signMessage(String message, @Nullable KeyParameter aesKey) throws KeyCrypterException {
-        byte[] data = Utils.formatMessageForSigning(message);
+        byte[] data = formatMessageForSigning(message);
         Sha256Hash hash = Sha256Hash.twiceOf(data);
         ECDSASignature sig = sign(hash, aesKey);
-        // Now we have to work backwards to figure out the recId needed to recover the signature.
-        int recId = -1;
-        for (int i = 0; i < 4; i++) {
-            ECKey k = ECKey.recoverFromSignature(i, sig, hash, isCompressed());
-            if (k != null && k.pub.equals(pub)) {
-                recId = i;
-                break;
-            }
-        }
-        if (recId == -1)
-            throw new RuntimeException("Could not construct a recoverable key. This should never happen.");
+        byte recId = findRecoveryId(hash, sig);
         int headerByte = recId + 27 + (isCompressed() ? 4 : 0);
         byte[] sigData = new byte[65];  // 1 header + 32 bytes for R + 32 bytes for S
         sigData[0] = (byte)headerByte;
         System.arraycopy(Utils.bigIntegerToBytes(sig.r, 32), 0, sigData, 1, 32);
         System.arraycopy(Utils.bigIntegerToBytes(sig.s, 32), 0, sigData, 33, 32);
-        return new String(Base64.encode(sigData), Charset.forName("UTF-8"));
+        return new String(Base64.encode(sigData), StandardCharsets.UTF_8);
     }
 
     /**
@@ -918,7 +902,7 @@ public class ECKey implements EncryptableItem {
         BigInteger r = new BigInteger(1, Arrays.copyOfRange(signatureEncoded, 1, 33));
         BigInteger s = new BigInteger(1, Arrays.copyOfRange(signatureEncoded, 33, 65));
         ECDSASignature sig = new ECDSASignature(r, s);
-        byte[] messageBytes = Utils.formatMessageForSigning(message);
+        byte[] messageBytes = formatMessageForSigning(message);
         // Note that the C++ code doesn't actually seem to specify any character encoding. Presumably it's whatever
         // JSON-SPIRIT hands back. Assume UTF-8 for now.
         Sha256Hash messageHash = Sha256Hash.twiceOf(messageBytes);
@@ -942,6 +926,26 @@ public class ECKey implements EncryptableItem {
         ECKey key = ECKey.signedMessageToKey(message, signatureBase64);
         if (!key.pub.equals(pub))
             throw new SignatureException("Signature did not match for message");
+    }
+
+    /**
+     * Returns the recovery ID, a byte with value between 0 and 3, inclusive, that specifies which of 4 possible
+     * curve points was used to sign a message. This value is also referred to as "v".
+     *
+     * @throws RuntimeException if no recovery ID can be found.
+     */
+    public byte findRecoveryId(Sha256Hash hash, ECDSASignature sig) {
+        byte recId = -1;
+        for (byte i = 0; i < 4; i++) {
+            ECKey k = ECKey.recoverFromSignature(i, sig, hash, isCompressed());
+            if (k != null && k.pub.equals(pub)) {
+                recId = i;
+                break;
+            }
+        }
+        if (recId == -1)
+            throw new RuntimeException("Could not construct a recoverable key. This should never happen.");
+        return recId;
     }
 
     /**
@@ -1032,7 +1036,7 @@ public class ECKey implements EncryptableItem {
 
     /**
      * Exports the private key in the form used by Bitcoin Core's "dumpprivkey" and "importprivkey" commands. Use
-     * the {@link org.bitcoinj.core.DumpedPrivateKey#toString()} method to get the string.
+     * the {@link DumpedPrivateKey#toString()} method to get the string.
      *
      * @param params The network this key is intended for use on.
      * @return Private key bytes as a {@link DumpedPrivateKey}.
@@ -1277,7 +1281,7 @@ public class ECKey implements EncryptableItem {
 
     public void formatKeyWithAddress(boolean includePrivateKeys, @Nullable KeyParameter aesKey, StringBuilder builder,
             NetworkParameters params) {
-        final Address address = toAddress(params);
+        final Address address = LegacyAddress.fromKey(params, this);
         builder.append("  addr:");
         builder.append(address.toString());
         builder.append("  hash160:");
@@ -1289,6 +1293,29 @@ public class ECKey implements EncryptableItem {
             builder.append("  ");
             builder.append(toStringWithPrivate(aesKey, params));
             builder.append("\n");
+        }
+    }
+
+    /** The string that prefixes all text messages signed using Bitcoin keys. */
+    private static final String BITCOIN_SIGNED_MESSAGE_HEADER = "Bitcoin Signed Message:\n";
+    private static final byte[] BITCOIN_SIGNED_MESSAGE_HEADER_BYTES = BITCOIN_SIGNED_MESSAGE_HEADER.getBytes(StandardCharsets.UTF_8);
+
+    /**
+     * <p>Given a textual message, returns a byte buffer formatted as follows:</p>
+     * <p><tt>[24] "Bitcoin Signed Message:\n" [message.length as a varint] message</tt></p>
+     */
+    private static byte[] formatMessageForSigning(String message) {
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            bos.write(BITCOIN_SIGNED_MESSAGE_HEADER_BYTES.length);
+            bos.write(BITCOIN_SIGNED_MESSAGE_HEADER_BYTES);
+            byte[] messageBytes = message.getBytes(StandardCharsets.UTF_8);
+            VarInt size = new VarInt(messageBytes.length);
+            bos.write(size.encode());
+            bos.write(messageBytes);
+            return bos.toByteArray();
+        } catch (IOException e) {
+            throw new RuntimeException(e);  // Cannot happen.
         }
     }
 }

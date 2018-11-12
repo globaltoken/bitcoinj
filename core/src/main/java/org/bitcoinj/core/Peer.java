@@ -19,6 +19,9 @@ package org.bitcoinj.core;
 import com.google.common.base.*;
 import com.google.common.base.Objects;
 import org.bitcoinj.core.listeners.*;
+import org.bitcoinj.net.AbstractTimeoutHandler;
+import org.bitcoinj.net.NioClient;
+import org.bitcoinj.net.NioClientManager;
 import org.bitcoinj.net.StreamConnection;
 import org.bitcoinj.store.BlockStore;
 import org.bitcoinj.store.BlockStoreException;
@@ -36,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+import java.net.SocketAddress;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -51,8 +55,8 @@ import static com.google.common.base.Preconditions.checkState;
  * handles low-level message (de)serialization.</p>
  *
  * <p>Note that timeouts are handled by the extended
- * {@link org.bitcoinj.net.AbstractTimeoutHandler} and timeout is automatically disabled (using
- * {@link org.bitcoinj.net.AbstractTimeoutHandler#setTimeoutEnabled(boolean)}) once the version
+ * {@link AbstractTimeoutHandler} and timeout is automatically disabled (using
+ * {@link AbstractTimeoutHandler#setTimeoutEnabled(boolean)}) once the version
  * handshake completes.</p>
  */
 public class Peer extends PeerSocketHandler {
@@ -178,9 +182,9 @@ public class Peer extends PeerSocketHandler {
      *
      * <p>Note that this does <b>NOT</b> make a connection to the given remoteAddress, it only creates a handler for a
      * connection. If you want to create a one-off connection, create a Peer and pass it to
-     * {@link org.bitcoinj.net.NioClientManager#openConnection(java.net.SocketAddress, StreamConnection)}
+     * {@link NioClientManager#openConnection(SocketAddress, StreamConnection)}
      * or
-     * {@link org.bitcoinj.net.NioClient#NioClient(java.net.SocketAddress, StreamConnection, int)}.</p>
+     * {@link NioClient#NioClient(SocketAddress, StreamConnection, int)}.</p>
      *
      * <p>The remoteAddress provided should match the remote address of the peer which is being connected to, and is
      * used to keep track of which peers relayed transactions and offer more descriptive logging.</p>
@@ -190,15 +194,15 @@ public class Peer extends PeerSocketHandler {
     }
 
     /**
-     * <p>Construct a peer that reads/writes from the given block chain. Transactions stored in a {@link org.bitcoinj.core.TxConfidenceTable}
-     * will have their confidence levels updated when a peer announces it, to reflect the greater likelyhood that
+     * <p>Construct a peer that reads/writes from the given block chain. Transactions stored in a {@link TxConfidenceTable}
+     * will have their confidence levels updated when a peer announces it, to reflect the greater likelihood that
      * the transaction is valid.</p>
      *
      * <p>Note that this does <b>NOT</b> make a connection to the given remoteAddress, it only creates a handler for a
      * connection. If you want to create a one-off connection, create a Peer and pass it to
-     * {@link org.bitcoinj.net.NioClientManager#openConnection(java.net.SocketAddress, StreamConnection)}
+     * {@link NioClientManager#openConnection(SocketAddress, StreamConnection)}
      * or
-     * {@link org.bitcoinj.net.NioClient#NioClient(java.net.SocketAddress, StreamConnection, int)}.</p>
+     * {@link NioClient#NioClient(SocketAddress, StreamConnection, int)}.</p>
      *
      * <p>The remoteAddress provided should match the remote address of the peer which is being connected to, and is
      * used to keep track of which peers relayed transactions and offer more descriptive logging.</p>
@@ -209,15 +213,15 @@ public class Peer extends PeerSocketHandler {
     }
 
     /**
-     * <p>Construct a peer that reads/writes from the given block chain. Transactions stored in a {@link org.bitcoinj.core.TxConfidenceTable}
-     * will have their confidence levels updated when a peer announces it, to reflect the greater likelyhood that
+     * <p>Construct a peer that reads/writes from the given block chain. Transactions stored in a {@link TxConfidenceTable}
+     * will have their confidence levels updated when a peer announces it, to reflect the greater likelihood that
      * the transaction is valid.</p>
      *
      * <p>Note that this does <b>NOT</b> make a connection to the given remoteAddress, it only creates a handler for a
      * connection. If you want to create a one-off connection, create a Peer and pass it to
-     * {@link org.bitcoinj.net.NioClientManager#openConnection(java.net.SocketAddress, StreamConnection)}
+     * {@link NioClientManager#openConnection(SocketAddress, StreamConnection)}
      * or
-     * {@link org.bitcoinj.net.NioClient#NioClient(java.net.SocketAddress, StreamConnection, int)}.</p>
+     * {@link NioClient#NioClient(SocketAddress, StreamConnection, int)}.</p>
      *
      * <p>The remoteAddress provided should match the remote address of the peer which is being connected to, and is
      * used to keep track of which peers relayed transactions and offer more descriptive logging.</p>
@@ -253,9 +257,9 @@ public class Peer extends PeerSocketHandler {
      *
      * <p>Note that this does <b>NOT</b> make a connection to the given remoteAddress, it only creates a handler for a
      * connection. If you want to create a one-off connection, create a Peer and pass it to
-     * {@link org.bitcoinj.net.NioClientManager#openConnection(java.net.SocketAddress, StreamConnection)}
+     * {@link NioClientManager#openConnection(SocketAddress, StreamConnection)}
      * or
-     * {@link org.bitcoinj.net.NioClient#NioClient(java.net.SocketAddress, StreamConnection, int)}.</p>
+     * {@link NioClient#NioClient(SocketAddress, StreamConnection, int)}.</p>
      *
      * <p>The remoteAddress provided should match the remote address of the peer which is being connected to, and is
      * used to keep track of which peers relayed transactions and offer more descriptive logging.</p>
@@ -561,6 +565,13 @@ public class Peer extends PeerSocketHandler {
                 (!params.allowEmptyPeerChain() && vPeerVersionMessage.bestHeight == 0)) {
             // Shut down the channel gracefully.
             log.info("{}: Peer does not have a copy of the block chain.", this);
+            close();
+            return;
+        }
+        if ((vPeerVersionMessage.localServices
+                & VersionMessage.NODE_BITCOIN_CASH) == VersionMessage.NODE_BITCOIN_CASH) {
+            log.info("{}: Peer follows an incompatible block chain.", this);
+            // Shut down the channel gracefully.
             close();
             return;
         }
@@ -1252,7 +1263,7 @@ public class Peer extends PeerSocketHandler {
                         // previous one: whilst the stopHash is the same (because we use the orphan root), the start hash
                         // will be different and so the getblocks req won't be dropped as a duplicate. We'll end up
                         // requesting a subset of what we already requested, which can lead to parallel chain downloads
-                        // and other nastyness. So we just do a quick removal of redundant getdatas here too.
+                        // and other nastiness. So we just do a quick removal of redundant getdatas here too.
                         //
                         // Note that as of June 2012 Bitcoin Core won't actually ever interleave blocks pushed as
                         // part of chain download with newly announced blocks, so it should always be taken care of by
@@ -1426,8 +1437,7 @@ public class Peer extends PeerSocketHandler {
         // headers and then request the blocks from that point onwards. "getheaders" does not send us an inv, it just
         // sends us the data we requested in a "headers" message.
 
-        // TODO: Block locators should be abstracted out rather than special cased here.
-        List<Sha256Hash> blockLocator = new ArrayList<>(51);
+        BlockLocator blockLocator = new BlockLocator();
         // For now we don't do the exponential thinning as suggested here:
         //
         //   https://en.bitcoin.it/wiki/Protocol_specification#getblocks
@@ -1451,7 +1461,7 @@ public class Peer extends PeerSocketHandler {
                     this, toHash, chainHead.getHeader().getHashAsString());
         StoredBlock cursor = chainHead;
         for (int i = 100; cursor != null && i > 0; i--) {
-            blockLocator.add(cursor.getHeader().getHash());
+            blockLocator = blockLocator.add(cursor.getHeader().getHash());
             try {
                 cursor = cursor.getPrev(store);
             } catch (BlockStoreException e) {
@@ -1461,7 +1471,7 @@ public class Peer extends PeerSocketHandler {
         }
         // Only add the locator if we didn't already do so. If the chain is < 50 blocks we already reached it.
         if (cursor != null)
-            blockLocator.add(params.getGenesisBlock().getHash());
+            blockLocator = blockLocator.add(params.getGenesisBlock().getHash());
 
         // Record that we requested this range of blocks so we can filter out duplicate requests in the event of a
         // block being solved during chain download.
@@ -1552,7 +1562,7 @@ public class Peer extends PeerSocketHandler {
     /**
      * Sends the peer a ping message and returns a future that will be invoked when the pong is received back.
      * The future provides a number which is the number of milliseconds elapsed between the ping and the pong.
-     * Once the pong is received the value returned by {@link org.bitcoinj.core.Peer#getLastPingTime()} is
+     * Once the pong is received the value returned by {@link Peer#getLastPingTime()} is
      * updated.
      * @throws ProtocolException if the peer version is too low to support measurable pings.
      */
@@ -1571,7 +1581,7 @@ public class Peer extends PeerSocketHandler {
     }
 
     /**
-     * Returns the elapsed time of the last ping/pong cycle. If {@link org.bitcoinj.core.Peer#ping()} has never
+     * Returns the elapsed time of the last ping/pong cycle. If {@link Peer#ping()} has never
      * been called or we did not hear back the "pong" message yet, returns {@link Long#MAX_VALUE}.
      */
     public long getLastPingTime() {
@@ -1586,7 +1596,7 @@ public class Peer extends PeerSocketHandler {
     }
 
     /**
-     * Returns a moving average of the last N ping/pong cycles. If {@link org.bitcoinj.core.Peer#ping()} has never
+     * Returns a moving average of the last N ping/pong cycles. If {@link Peer#ping()} has never
      * been called or we did not hear back the "pong" message yet, returns {@link Long#MAX_VALUE}. The moving average
      * window is 5 buckets.
      */

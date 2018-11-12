@@ -40,7 +40,7 @@ public class MainNetParams extends AbstractBitcoinNetParams {
         dumpedPrivateKeyHeader = 166;
         addressHeader = 38;
         p2shHeader = 5;
-        acceptableAddressCodes = new int[] { addressHeader, p2shHeader };
+        segwitAddressHrp = "gt";
         port = 9319;
         packetMagic = 0xc708d32dL;
         bip32HeaderPub = 0x0488B21E; //The 4 byte header that serializes in base58 to "xpub".
@@ -74,11 +74,32 @@ public class MainNetParams extends AbstractBitcoinNetParams {
 		
 		
         dnsSeeds = new String[] {
-                "134.255.221.7",
-				"5.1.81.81",
-				"149.56.241.2",
-				"185.188.6.41",
-				"62.75.171.246"
+            "134.255.221.7", // Globaltoken base node
+            "bchain.info", // bchain.info
+            "globaltoken.org", // GlobalToken base node II
+            "explorer.globaltoken.org", // GlobalToken base node III
+            "lameserver.de", // GlobalToken Node by Astrali
+            "pool.cryptopowered.club",  // GlobalToken Cryptopowered node
+            "pool2.cryptopowered.club", // GlobalToken Cryptopowered node
+            "bit2pool.com", // GlobalToken Bit2Pool node
+            "185.206.144.200", // GlobalToken Hardfork node: 01/18
+            "185.206.145.201", // GlobalToken Hardfork node: 02/18
+            "185.206.146.200", // GlobalToken Hardfork node: 03/18
+            "185.206.147.203", // GlobalToken Hardfork node: 04/18
+            "185.205.209.67",  // GlobalToken Hardfork node: 05/18
+            "185.206.147.202", // GlobalToken Hardfork node: 06/18
+            "185.205.209.137", // GlobalToken Hardfork node: 07/18
+            "185.203.119.194", // GlobalToken Hardfork node: 08/18
+            "185.203.119.195", // GlobalToken Hardfork node: 09/18
+            "185.206.144.201", // GlobalToken Hardfork node: 10/18
+            "185.141.62.86",   // GlobalToken Hardfork node: 11/18
+            "185.141.62.87",   // GlobalToken Hardfork node: 12/18
+            "185.141.62.88",   // GlobalToken Hardfork node: 13/18
+            "185.141.62.89",   // GlobalToken Hardfork node: 14/18
+            "185.141.62.90",   // GlobalToken Hardfork node: 15/18
+            "185.141.62.91",   // GlobalToken Hardfork node: 16/18
+            "185.141.62.92",   // GlobalToken Hardfork node: 17/18
+            "185.203.118.117", // GlobalToken Hardfork node: 18/18
         };
         httpSeeds = null;
 

@@ -35,19 +35,23 @@ import static com.google.common.base.Preconditions.checkState;
  * and testing of applications and new Bitcoin versions.
  */
 public class TestNet3Params extends AbstractBitcoinNetParams {
+    public static final int TESTNET_MAJORITY_WINDOW = 100;
+    public static final int TESTNET_MAJORITY_REJECT_BLOCK_OUTDATED = 75;
+    public static final int TESTNET_MAJORITY_ENFORCE_BLOCK_UPGRADE = 51;
+
     public TestNet3Params() {
         super();
         id = ID_TESTNET;
-        // Genesis hash is 000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943
         packetMagic = 0x3a6f375b;
+
         interval = INTERVAL;
         targetTimespan = TARGET_TIMESPAN;
         maxTarget = Utils.decodeCompactBits(0x1d00ffffL);
         port = 19319;
         addressHeader = 111;
         p2shHeader = 196;
-        acceptableAddressCodes = new int[] { addressHeader, p2shHeader };
         dumpedPrivateKeyHeader = 239;
+        segwitAddressHrp = "tg";
         genesisBlock.setTime(1480961109L);
         genesisBlock.setDifficultyTarget(0x1d00ffffL);
         genesisBlock.setNonce(2864352084L);
@@ -58,15 +62,40 @@ public class TestNet3Params extends AbstractBitcoinNetParams {
         alertSigningKey = Utils.HEX.decode("042cddcb679f0089cac93820d4e7e309a43e0bb7d02e9750c9e8dacaca58bd98662eba63834eff2efbb62da1aa51af4c7885d68fdb4f020a37909dff4c1467d28f");
 
         dnsSeeds = new String[] {
-                "134.255.221.7" // No active Testnet Peers yet, use localhost.
+            "134.255.221.7", // Globaltoken base node
+            "bchain.info", // bchain.info
+            "globaltoken.org", // GlobalToken base node II
+            "explorer.globaltoken.org", // GlobalToken base node III
+            "lameserver.de", // GlobalToken Node by Astrali
+            "pool.cryptopowered.club",  // GlobalToken Cryptopowered node
+            "pool2.cryptopowered.club", // GlobalToken Cryptopowered node
+            "bit2pool.com", // GlobalToken Bit2Pool node
+            "185.206.144.200", // GlobalToken Hardfork node: 01/18
+            "185.206.145.201", // GlobalToken Hardfork node: 02/18
+            "185.206.146.200", // GlobalToken Hardfork node: 03/18
+            "185.206.147.203", // GlobalToken Hardfork node: 04/18
+            "185.205.209.67",  // GlobalToken Hardfork node: 05/18
+            "185.206.147.202", // GlobalToken Hardfork node: 06/18
+            "185.205.209.137", // GlobalToken Hardfork node: 07/18
+            "185.203.119.194", // GlobalToken Hardfork node: 08/18
+            "185.203.119.195", // GlobalToken Hardfork node: 09/18
+            "185.206.144.201", // GlobalToken Hardfork node: 10/18
+            "185.141.62.86",   // GlobalToken Hardfork node: 11/18
+            "185.141.62.87",   // GlobalToken Hardfork node: 12/18
+            "185.141.62.88",   // GlobalToken Hardfork node: 13/18
+            "185.141.62.89",   // GlobalToken Hardfork node: 14/18
+            "185.141.62.90",   // GlobalToken Hardfork node: 15/18
+            "185.141.62.91",   // GlobalToken Hardfork node: 16/18
+            "185.141.62.92",   // GlobalToken Hardfork node: 17/18
+            "185.203.118.117", // GlobalToken Hardfork node: 18/18
         };
         addrSeeds = null;
         bip32HeaderPub = 0x043587CF;
         bip32HeaderPriv = 0x04358394;
 
-        majorityEnforceBlockUpgrade = TestNet2Params.TESTNET_MAJORITY_ENFORCE_BLOCK_UPGRADE;
-        majorityRejectBlockOutdated = TestNet2Params.TESTNET_MAJORITY_REJECT_BLOCK_OUTDATED;
-        majorityWindow = TestNet2Params.TESTNET_MAJORITY_WINDOW;
+        majorityEnforceBlockUpgrade = TESTNET_MAJORITY_ENFORCE_BLOCK_UPGRADE;
+        majorityRejectBlockOutdated = TESTNET_MAJORITY_REJECT_BLOCK_OUTDATED;
+        majorityWindow = TESTNET_MAJORITY_WINDOW;
     }
 
     private static TestNet3Params instance;

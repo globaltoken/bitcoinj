@@ -20,8 +20,10 @@
  
 /* Notes:
  * - Endianness: All byte arrays that represent numbers (such as hashes and private keys) are Big Endian
- * - To regenerate after editing, run: mvn generate-sources -DupdateProtobuf
+ * - To regenerate after editing, run: gradle generateProto
  */
+
+syntax = "proto2";
 
 package wallet;
 
@@ -132,6 +134,9 @@ message Key {
 
   // Encrypted version of the seed
   optional EncryptedData encrypted_deterministic_seed = 9;
+
+  // The path to the root. Only applicable to a DETERMINISTIC_MNEMONIC key entry.
+  repeated uint32 account_path = 10 [packed = true];
 }
 
 message Script {
@@ -140,6 +145,10 @@ message Script {
   // Timestamp stored as millis since epoch. Useful for skipping block bodies before this point
   // when watching for scripts on the blockchain.
   required int64 creation_timestamp = 2;
+}
+
+message ScriptWitness {
+    repeated bytes data = 1;
 }
 
 message TransactionInput {
@@ -153,6 +162,8 @@ message TransactionInput {
   optional uint32 sequence = 4;
   // Value of connected output, if known
   optional int64 value = 5;
+  // script witness
+  optional ScriptWitness witness = 6;
 }
 
 message TransactionOutput {
@@ -327,16 +338,6 @@ message Tag {
     required bytes data = 2;
 }
 
-/**
- * Data required to reconstruct TransactionSigner.
- */
-message TransactionSigner {
-	// fully qualified class name of TransactionSigner implementation
-	required string class_name = 1;
-	// arbitrary data required for signer to function
-	optional bytes data = 2;
-}
-
 /** A bitcoin wallet */
 message Wallet {
   /**
@@ -390,8 +391,7 @@ message Wallet {
 
   repeated Tag tags = 16;
 
-  // transaction signers added to the wallet
-  repeated TransactionSigner transaction_signers = 17;
+  // (field number 17 was used by transaction_signers)
 
   // Next tag: 18
 }

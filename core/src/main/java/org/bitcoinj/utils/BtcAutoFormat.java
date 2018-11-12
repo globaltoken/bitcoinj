@@ -40,10 +40,10 @@ import java.util.Locale;
  * of consecutive zeros in the number that is displayed, and includes either a currency code or
  * symbol in the formatted value to indicate which denomination was chosen.
  *
- * <p>When parsing <code>String</code> representations of Bitcoin monetary values, instances of
+ * <p>When parsing {@code String} representations of Bitcoin monetary values, instances of
  * this class automatically recognize units indicators consisting of currency codes and
  * symbols, including including those containing currency or metric prefixes such as
- * <code>"¢"</code> or <code>"c"</code> to indicate hundredths, and interpret each number being
+ * {@code "¢"} or {@code "c"} to indicate hundredths, and interpret each number being
  * parsed in accordance with the recognized denominational units.
  *
  * <p>A more detailed explanation, including examples, is in the documentation for the {@link
@@ -60,8 +60,8 @@ import java.util.Locale;
 public final class BtcAutoFormat extends BtcFormat {
 
     /**
-     * Enum for specifying the style of currency indicators thas are used
-     * when formatting, ether codes or symbols.
+     * Enum for specifying the style of currency indicators that are used
+     * when formatting, either codes or symbols.
      */
     public enum Style {
 
@@ -83,9 +83,9 @@ public final class BtcAutoFormat extends BtcFormat {
             @Override void apply(DecimalFormat decimalFormat) {
                 /* To switch to using codes from symbols, we replace each single occurrence of the
                  * currency-sign character with two such characters in a row.
-                 * We also insert a space character between every occurence of this character and an
-                 * adjacent numerical digit or negative sign (that is, between the currency-sign and
-                 * the signed-number). */
+                 * We also insert a space character between every occurrence of this character and
+                 * an adjacent numerical digit or negative sign (that is, between the currency-sign
+                 * and the signed-number). */
                 decimalFormat.applyPattern(
                     negify(decimalFormat.toPattern()).replaceAll("¤","¤¤").
                                                       replaceAll("([#0.,E-])¤¤","$1 ¤¤").
@@ -171,7 +171,7 @@ public final class BtcAutoFormat extends BtcFormat {
         return places;
     }
 
-    /** Returns the <code>int</code> value indicating coin denomination.  This is what causes
+    /** Returns the {@code int} value indicating coin denomination.  This is what causes
      *  the number in a parsed value that lacks a units indicator to be interpreted as a quantity
      *  of bitcoins. */
     @Override

@@ -27,7 +27,7 @@ import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import org.spongycastle.crypto.params.KeyParameter;
+import org.bouncycastle.crypto.params.KeyParameter;
 import wallettemplate.controls.BitcoinAddressValidator;
 import wallettemplate.utils.TextFieldValidator;
 import wallettemplate.utils.WTUtils;
@@ -68,7 +68,7 @@ public class SendMoneyController {
         // Address exception cannot happen as we validated it beforehand.
         try {
             Coin amount = Coin.parseCoin(amountEdit.getText());
-            Address destination = Address.fromBase58(Main.params, address.getText());
+            LegacyAddress destination = LegacyAddress.fromBase58(Main.params, address.getText());
             SendRequest req;
             if (amount.equals(Main.bitcoin.wallet().getBalance()))
                 req = SendRequest.emptyWallet(destination);

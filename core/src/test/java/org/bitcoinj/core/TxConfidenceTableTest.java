@@ -23,11 +23,18 @@ import org.junit.*;
 
 import java.net.*;
 
-import static org.bitcoinj.core.Coin.*;
-import static org.junit.Assert.*;
+import static org.bitcoinj.core.Coin.COIN;
+import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.replay;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class TxConfidenceTableTest {
-    private static final NetworkParameters PARAMS = UnitTestParams.get();
+    private static final NetworkParameters UNITTEST = UnitTestParams.get();
     private Transaction tx1, tx2;
     private PeerAddress address1, address2, address3;
     private TxConfidenceTable table;
@@ -35,24 +42,24 @@ public class TxConfidenceTableTest {
     @Before
     public void setup() throws Exception {
         BriefLogFormatter.init();
-        Context context = new Context(PARAMS);
+        Context context = new Context(UNITTEST);
         table = context.getConfidenceTable();
 
-        Address to = new ECKey().toAddress(PARAMS);
-        Address change = new ECKey().toAddress(PARAMS);
+        Address to = LegacyAddress.fromKey(UNITTEST, new ECKey());
+        Address change = LegacyAddress.fromKey(UNITTEST, new ECKey());
 
-        tx1 = FakeTxBuilder.createFakeTxWithChangeAddress(PARAMS, COIN, to, change);
-        tx2 = FakeTxBuilder.createFakeTxWithChangeAddress(PARAMS, COIN, to, change);
+        tx1 = FakeTxBuilder.createFakeTxWithChangeAddress(UNITTEST, COIN, to, change);
+        tx2 = FakeTxBuilder.createFakeTxWithChangeAddress(UNITTEST, COIN, to, change);
         assertEquals(tx1.getHash(), tx2.getHash());
 
-        address1 = new PeerAddress(PARAMS, InetAddress.getByAddress(new byte[] { 127, 0, 0, 1 }));
-        address2 = new PeerAddress(PARAMS, InetAddress.getByAddress(new byte[] { 127, 0, 0, 2 }));
-        address3 = new PeerAddress(PARAMS, InetAddress.getByAddress(new byte[] { 127, 0, 0, 3 }));
+        address1 = new PeerAddress(UNITTEST, InetAddress.getByAddress(new byte[] { 127, 0, 0, 1 }));
+        address2 = new PeerAddress(UNITTEST, InetAddress.getByAddress(new byte[] { 127, 0, 0, 2 }));
+        address3 = new PeerAddress(UNITTEST, InetAddress.getByAddress(new byte[] { 127, 0, 0, 3 }));
     }
 
     @Test
     public void pinHandlers() throws Exception {
-        Transaction tx = PARAMS.getDefaultSerializer().makeTransaction(tx1.bitcoinSerialize());
+        Transaction tx = UNITTEST.getDefaultSerializer().makeTransaction(tx1.bitcoinSerialize());
         Sha256Hash hash = tx.getHash();
         table.seen(hash, address1);
         assertEquals(1, tx.getConfidence().numBroadcastPeers());
@@ -83,6 +90,40 @@ public class TxConfidenceTableTest {
         run[0] = null;
         table.seen(tx1.getHash(), address1);
         assertNull(run[0]);
+    }
+
+    @Test
+    public void testSeen() {
+        PeerAddress peer = createMock(PeerAddress.class);
+
+        Sha256Hash brokenHash = createMock(Sha256Hash.class);
+        Sha256Hash correctHash = createMock(Sha256Hash.class);
+
+        TransactionConfidence brokenConfidence = createMock(TransactionConfidence.class);
+        expect(brokenConfidence.getTransactionHash()).andReturn(brokenHash);
+        expect(brokenConfidence.markBroadcastBy(peer)).andThrow(new ArithmeticException("some error"));
+
+        TransactionConfidence correctConfidence = createMock(TransactionConfidence.class);
+        expect(correctConfidence.getTransactionHash()).andReturn(correctHash);
+        expect(correctConfidence.markBroadcastBy(peer)).andReturn(true);
+        correctConfidence.queueListeners(anyObject(TransactionConfidence.Listener.ChangeReason.class));
+        expectLastCall();
+
+        TransactionConfidence.Factory factory = createMock(TransactionConfidence.Factory.class);
+        expect(factory.createConfidence(brokenHash)).andReturn(brokenConfidence);
+        expect(factory.createConfidence(correctHash)).andReturn(correctConfidence);
+
+        replay(factory, brokenConfidence, correctConfidence);
+
+        TxConfidenceTable table = new TxConfidenceTable(1, factory);
+
+        try {
+            table.seen(brokenHash, peer);
+        } catch (ArithmeticException expected) {
+            // do nothing
+        }
+
+        assertNotNull(table.seen(correctHash, peer));
     }
 
     @Test
